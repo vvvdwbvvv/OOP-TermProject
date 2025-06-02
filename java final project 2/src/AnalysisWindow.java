@@ -1,14 +1,12 @@
-import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.util.List;
+import javax.swing.*;
 
 public class AnalysisWindow extends JFrame {
 
     public AnalysisWindow(List<WorkoutData> data) {
         setTitle("🏋️ 訓練分析儀表板");
-        setSize(1000, 600);
+        setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);

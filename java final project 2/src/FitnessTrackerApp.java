@@ -209,9 +209,19 @@ public class FitnessTrackerApp { // Renamed from main to FitnessTrackerApp
 
         JPanel recordButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton recordSessionButton = new JButton("記錄健身課程");
+        JButton callWindowButton = new JButton("呼叫視窗");
         recordButtonPanel.add(recordSessionButton);
+        recordButtonPanel.add(callWindowButton);
         bottomPanel.add(recordButtonPanel);
-
+        
+        callWindowButton.addActionListener(e->{
+            List<WorkoutData> data = WorkoutData.fetchRecentData();
+            if(!data.isEmpty()){
+                new AnalysisWindow(data);
+            } else {
+                JOptionPane.showMessageDialog(mainPanel, "沒有可用的健身數據進行分析。", "無數據", JOptionPane.WARNING_MESSAGE);
+            }           // Open the call window with the workout data
+        });
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         // Initial population of available exercises
