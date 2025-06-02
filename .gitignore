@@ -4,3 +4,7 @@
 bin/
 .classpath
 .project
+lib/
+google/
+secret.json
+# Eclipse specific files
