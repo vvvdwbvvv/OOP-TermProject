@@ -321,7 +321,7 @@ public class FitnessTrackerApp { // Renamed from main to FitnessTrackerApp
             lightPanel = new LightPanel();
             suggestionLabel = new JLabel("建議: --");
             refreshButton = new JButton("刷新狀態");
-            refreshButton.addActionListener(_ -> updateOccupancy());
+            refreshButton.addActionListener(e -> updateOccupancy());
             top.add(occupancyLabel);
             top.add(lightPanel);
             top.add(suggestionLabel);
@@ -335,7 +335,7 @@ public class FitnessTrackerApp { // Renamed from main to FitnessTrackerApp
             idLabel = new JLabel("會員ID:");
             idField = new JTextField(10);
             checkMembershipButton = new JButton("查詢會員");
-            checkMembershipButton.addActionListener(_ -> checkMembership());
+            checkMembershipButton.addActionListener(e -> checkMembership());
             membershipLabel = new JLabel("剩餘時效: --");
             bottom.add(idLabel);
             bottom.add(idField);
