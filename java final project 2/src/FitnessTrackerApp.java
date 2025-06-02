@@ -3,8 +3,17 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.time.DayOfWeek; // Added for WeeklyPlan
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Map; // Added for WeeklyPlan
 import java.util.ArrayList; // Added for WeeklyPlan display
 
@@ -55,6 +64,9 @@ public class FitnessTrackerApp { // Renamed from main to FitnessTrackerApp
         // Panel for weekly plan
         JPanel weeklyPlanPanel = createWeeklyPlanPanel(); // Call new method
         tabbedPane.addTab("每週計劃", weeklyPlanPanel);
+
+        JPanel gymStatusPanel = new GymStatusPanel();
+        tabbedPane.addTab("健身房即時狀態", gymStatusPanel);
 
         frame.add(tabbedPane);
         frame.setVisible(true);
@@ -267,6 +279,167 @@ public class FitnessTrackerApp { // Renamed from main to FitnessTrackerApp
         updateDailyPlanView();
 
         return mainPanel;
+    }
+
+    private static class GymStatusPanel extends JPanel {
+        private JLabel occupancyLabel;
+        private LightPanel lightPanel;
+        private JLabel suggestionLabel;
+        private JButton refreshButton;
+        private JLabel idLabel;
+        private JTextField idField;
+        private JButton checkMembershipButton;
+        private JLabel membershipLabel;
+
+        private Connection conn;
+
+        private static final String DB_URL = "jdbc:mysql://140.119.19.73:3315/TG10?useSSL=false";
+        private static final String DB_USER = "TG10";
+        private static final String DB_PW = "iRIzsI";
+
+        public GymStatusPanel() {
+            setLayout(new BorderLayout());
+            initDB();
+            buildUI();
+            updateOccupancy();
+        }
+
+        private void initDB() {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PW);
+            } catch (ClassNotFoundException e) {
+                JOptionPane.showMessageDialog(this, "找不到資料庫驅動: " + e.getMessage(), "錯誤", JOptionPane.ERROR_MESSAGE);
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "資料庫連線失敗: " + e.getMessage(), "錯誤", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        private void buildUI() {
+            JPanel top = new JPanel(new FlowLayout());
+            occupancyLabel = new JLabel("目前人數: -- / --");
+            lightPanel = new LightPanel();
+            suggestionLabel = new JLabel("建議: --");
+            refreshButton = new JButton("刷新狀態");
+            refreshButton.addActionListener(_ -> updateOccupancy());
+            top.add(occupancyLabel);
+            top.add(lightPanel);
+            top.add(suggestionLabel);
+            top.add(refreshButton);
+            add(top, BorderLayout.NORTH);
+
+            ImagePanel imgPanel = new ImagePanel("/images/gym_diagram.png");
+            add(imgPanel, BorderLayout.CENTER);
+
+            JPanel bottom = new JPanel(new FlowLayout());
+            idLabel = new JLabel("會員ID:");
+            idField = new JTextField(10);
+            checkMembershipButton = new JButton("查詢會員");
+            checkMembershipButton.addActionListener(_ -> checkMembership());
+            membershipLabel = new JLabel("剩餘時效: --");
+            bottom.add(idLabel);
+            bottom.add(idField);
+            bottom.add(checkMembershipButton);
+            bottom.add(membershipLabel);
+            add(bottom, BorderLayout.SOUTH);
+        }
+
+        class ImagePanel extends JPanel {
+            private final Image image;
+
+            /** path 可以用 getResource 取得的 classpath 路徑 */
+            public ImagePanel(String pathInClasspath) {
+                URL url = getClass().getResource(pathInClasspath);
+                if (url == null)
+                    throw new IllegalArgumentException("找不到圖片: " + pathInClasspath);
+                image = new ImageIcon(url).getImage();
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                if (image == null) return;
+
+                int pw = getWidth(), ph = getHeight();
+                double iw = image.getWidth(null), ih = image.getHeight(null);
+                double scale = Math.min(pw / iw, ph / ih);     // 等比例
+                int w = (int) (iw * scale);
+                int h = (int) (ih * scale);
+                int x = (pw - w) / 2;
+                int y = (ph - h) / 2;
+
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2.drawImage(image, x, y, w, h, this);
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(400, 300); 
+            }
+        }
+
+
+        private void updateOccupancy() {
+            if (conn == null) return;
+            String sql = "SELECT current_people, total_people FROM real_time_status ORDER BY time DESC LIMIT 1";
+            try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                if (rs.next()) {
+                    int cur = rs.getInt("current_people");
+                    int tot = rs.getInt("total_people");
+                    occupancyLabel.setText("目前人數: " + cur + " / " + tot);
+                    double ratio = (double) cur / tot;
+                    if (ratio > 0.8) {
+                        lightPanel.setColor(Color.RED);
+                        suggestionLabel.setText("建議: 請避開高峰");
+                    } else if (ratio > 0.5) {
+                        lightPanel.setColor(Color.ORANGE);
+                        suggestionLabel.setText("建議: 適中，可斟酌");
+                    } else {
+                        lightPanel.setColor(Color.GREEN);
+                        suggestionLabel.setText("建議: 舒適，適合前往");
+                    }
+                    lightPanel.repaint();
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "查詢佔用率失敗: " + ex.getMessage());
+            }
+        }
+
+        private void checkMembership() {
+            if (conn == null) return;
+            String id = idField.getText().trim();
+            if (id.isEmpty()) { membershipLabel.setText("請輸入ID"); return; }
+            String sql = "SELECT register_date, duration FROM member WHERE id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        LocalDate reg = rs.getDate("register_date").toLocalDate();
+                        int dur = rs.getInt("duration");
+                        LocalDate expiry = reg.plusDays(dur);
+                        long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), expiry);
+                        membershipLabel.setText(daysLeft < 0 ? "已過期" : "剩餘: " + daysLeft + " 天");
+                    } else {
+                        membershipLabel.setText("查無此會員");
+                    }
+                }
+            } catch (SQLException e) {
+                membershipLabel.setText("查詢失敗");
+            }
+        }
+        private static class LightPanel extends JPanel {
+            private Color color = Color.GRAY;
+            public void setColor(Color c) { this.color = c; }
+            @Override protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(color);
+                g.fillOval(0, 0, getWidth(), getHeight());
+            }
+            @Override public Dimension getPreferredSize() { return new Dimension(30,30); }
+        }
     }
 
     private void updatePlanAvailableExercises() {
