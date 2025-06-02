@@ -99,7 +99,7 @@ public class DatabaseManager {
 
         try (Connection conn = getConnection(); // getConnection() 現在會使用設定檔的資訊
              Statement stmt = conn.createStatement()) {
-            
+
             System.out.println("Creating table 'exercises' if it does not exist...");
             stmt.executeUpdate(createExercisesTableSQL);
             System.out.println("Table 'exercises' created or already exists.");
@@ -117,7 +117,7 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
-    
+
     public void populateDefaultExercises() {
         List<Exercise> defaultExercises = ExerciseData.getAllDefaultExercises(); //
         String sql = "INSERT INTO exercises (name, body_part, type) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name=name;";
@@ -141,7 +141,7 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
-    
+
     public Exercise getExerciseFromDBByNameAndBodyPart(String name, String bodyPart) {
         String sql = "SELECT id, name, body_part, type FROM exercises WHERE name = ? AND body_part = ?";
         try (Connection conn = getConnection(); // getConnection() 現在會使用設定檔的資訊
@@ -151,10 +151,10 @@ public class DatabaseManager {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return new Exercise(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    BodyPart.valueOf(rs.getString("body_part")), //
-                    Exercise.ExerciseType.valueOf(rs.getString("type")) //
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        BodyPart.valueOf(rs.getString("body_part")), //
+                        Exercise.ExerciseType.valueOf(rs.getString("type")) //
                 );
             }
         } catch (SQLException e) {
@@ -171,7 +171,7 @@ public class DatabaseManager {
             pstmt.setString(1, exercise.getName());
             pstmt.setString(2, exercise.getBodyPart().name());
             pstmt.setString(3, exercise.getType().name());
-            
+
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
@@ -196,10 +196,10 @@ public class DatabaseManager {
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return new Exercise(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    BodyPart.valueOf(rs.getString("body_part")), //
-                    Exercise.ExerciseType.valueOf(rs.getString("type")) //
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        BodyPart.valueOf(rs.getString("body_part")), //
+                        Exercise.ExerciseType.valueOf(rs.getString("type")) //
                 );
             }
         } catch (SQLException e) {
@@ -208,7 +208,7 @@ public class DatabaseManager {
         }
         return null;
     }
-    
+
     public List<Exercise> getAllExercisesFromDB() { //
         List<Exercise> exercises = new ArrayList<>(); //
         String sql = "SELECT id, name, body_part, type FROM exercises";
@@ -217,10 +217,10 @@ public class DatabaseManager {
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 exercises.add(new Exercise( //
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    BodyPart.valueOf(rs.getString("body_part")), //
-                    Exercise.ExerciseType.valueOf(rs.getString("type")) //
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        BodyPart.valueOf(rs.getString("body_part")), //
+                        Exercise.ExerciseType.valueOf(rs.getString("type")) //
                 ));
             }
         } catch (SQLException e) {

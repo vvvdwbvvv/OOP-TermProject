@@ -21,7 +21,7 @@ public class TrainingReminderGUI {
 		} else {
 		}
 
-		// 取得今天星期幾s
+		// 取得今天星期幾
 		LocalDate today = LocalDate.now();
 		DayOfWeek day = today.getDayOfWeek();
 

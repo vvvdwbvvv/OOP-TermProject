@@ -25,9 +25,9 @@ public class ReminderStatus {
 	public static void clearSnooze() {
 		prefs.remove("snooze");
 	}
-	
+
 	public static void resetDismissed() {
-	    prefs.remove("dismissedDate");
-	    prefs.remove("snooze");
+		prefs.remove("dismissedDate");
+		prefs.remove("snooze");
 	}
 }

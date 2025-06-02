@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WorkoutData {
-	private static final List<WorkoutExercise> workoutExercises = new ArrayList<>();
+    private static final List<WorkoutExercise> workoutExercises = new ArrayList<>();
 
     public static void addWorkoutExercise(WorkoutExercise we) {
         workoutExercises.add(we);
@@ -18,7 +18,7 @@ public class WorkoutData {
     public static void clearWorkoutExercises() {
         workoutExercises.clear();
     }
-    
+
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String muscleGroup;
@@ -67,7 +67,10 @@ public class WorkoutData {
                 LocalDateTime start = rs.getTimestamp("start_time").toLocalDateTime();
                 LocalDateTime end = rs.getTimestamp("end_time").toLocalDateTime();
                 String group = rs.getString("body_parts_trained");
-                int cardio = 0; // 如果未來你有要統計 cardios 可再補邏輯
+                if (group == null) { // Add null check here
+                    group = ""; // Default to empty string if database value is NULL
+                }
+                int cardio = rs.getInt("cardio_time"); // rs.getInt returns 0 if SQL NULL
 
                 dataList.add(new WorkoutData(start, end, group, cardio));
             }

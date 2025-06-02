@@ -3,6 +3,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
 
 /**
  * WeeklyPlan 類別用於規劃一週的訓練內容。
@@ -140,5 +144,88 @@ public class WeeklyPlan {
             }
         }
         return false;
+    }
+
+    /**
+     * 將每週計畫儲存到資料庫。
+     * 這個方法會清除資料庫中現有的計畫資料，然後插入當前的計畫。
+     */
+    public void savePlanToDatabase() {
+        Connection conn = null;
+        PreparedStatement pstmtDelete = null;
+        PreparedStatement pstmtInsert = null;
+
+        String deleteSql = "DELETE FROM weekly_plan"; // Clears the entire table.
+        String insertSql = "INSERT INTO weekly_plan (day_of_week, body_part, exercise_id,exercise_name) VALUES (?, ?, ?, ?)";
+
+        try {
+            conn = DatabaseManager.getConnection();
+            conn.setAutoCommit(false); // Start transaction
+
+            // 1. Clear existing plan data
+            pstmtDelete = conn.prepareStatement(deleteSql);
+            pstmtDelete.executeUpdate();
+
+            // 2. Insert new plan data
+            pstmtInsert = conn.prepareStatement(insertSql);
+
+            for (Map.Entry<DayOfWeek, Map<BodyPart, List<Exercise>>> dayEntry : this.plan.entrySet()) {
+                DayOfWeek day = dayEntry.getKey();
+                Map<BodyPart, List<Exercise>> exercisesForDay = dayEntry.getValue();
+
+                for (Map.Entry<BodyPart, List<Exercise>> partEntry : exercisesForDay.entrySet()) {
+                    BodyPart bodyPart = partEntry.getKey();
+                    List<Exercise> exercises = partEntry.getValue();
+
+                    for (Exercise exercise : exercises) {
+                        if (exercise != null && exercise.getId() != 0) { // Ensure exercise and its ID are valid
+                            pstmtInsert.setString(1, day.toString());
+                            pstmtInsert.setString(2, bodyPart.name()); // Make sure bodyPart.name() provides the correct format for the DB
+                            pstmtInsert.setInt(3, exercise.getId());
+                            pstmtInsert.setString(4, exercise.getName()); // Added this line to set exercise_name
+                            pstmtInsert.addBatch();
+                        }
+                    }
+                }
+            }
+
+            pstmtInsert.executeBatch();
+            conn.commit(); // Commit transaction
+            // Optionally, show a success message, but it might be too frequent here.
+            // JOptionPane.showMessageDialog(null, "每週計劃已成功更新到資料庫！", "儲存成功", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (SQLException ex) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e_roll) {
+                    System.err.println("Rollback failed: " + e_roll.getMessage());
+                }
+            }
+            JOptionPane.showMessageDialog(null, "儲存每週計劃時發生資料庫錯誤: " + ex.getMessage(), "資料庫錯誤", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } catch (Exception e) { // Catch other potential runtime exceptions
+            JOptionPane.showMessageDialog(null, "儲存每週計劃時發生未知錯誤: " + e.getMessage(), "未知錯誤", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e_roll) {
+                    System.err.println("Rollback failed during general exception: " + e_roll.getMessage());
+                }
+            }
+        }
+        finally {
+            try {
+                if (pstmtDelete != null) pstmtDelete.close();
+                if (pstmtInsert != null) pstmtInsert.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException ex_close) {
+                System.err.println("Failed to close resources: " + ex_close.getMessage());
+            }
+        }
     }
 }

@@ -17,6 +17,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import java.time.DayOfWeek;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import java.util.List;
 import java.util.Map;
 import java.sql.Connection;
@@ -27,6 +30,8 @@ import java.sql.Statement;
 import java.io.File;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import javafx.application.Platform;
 
 public class FitnessTrackerApp extends Application {
@@ -45,6 +50,11 @@ public class FitnessTrackerApp extends Application {
     private ComboBox<BodyPart> planBodyPartComboBox;
     private ListView<Exercise> planAvailableExercisesList;
     private ListView<String> dailyPlanList;
+    private Button restTimerButton;
+    private Label restTimerLabel;
+    private Timeline stopwatch;
+    private boolean stopwatchRunning = false;
+    private int elapsedSeconds = 0;
 
     @Override
     public void start(Stage primaryStage) {
@@ -68,7 +78,7 @@ public class FitnessTrackerApp extends Application {
 
         tabPane.getTabs().addAll(recordWorkoutTab, weeklyPlanTab, gymStatusTab, chatTab);
 
-        Scene scene = new Scene(tabPane, 800, 600);
+        Scene scene = new Scene(tabPane, 1000, 600);
         URL lightCssUrl = getClass().getResource("/ui.css");
         if (lightCssUrl == null) {
             throw new IllegalStateException("無法找到 /ui.css，請確認已把 ui.css 放在 src/main/resources/");
@@ -97,6 +107,10 @@ public class FitnessTrackerApp extends Application {
         mainPane.setPadding(new Insets(15));
         mainPane.getStyleClass().add("root");
 
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        startTimeField = new TextField();
+        startTimeField.setText(dtf.format(LocalDateTime.now()));
+
         // ===== Top 區：身體部位 + 時間欄位 =====
         HBox topPane = new HBox(12);
         topPane.setAlignment(Pos.CENTER_LEFT);
@@ -112,18 +126,25 @@ public class FitnessTrackerApp extends Application {
 
         Label lblStart = new Label("開始時間 (YYYY-MM-DD HH:MM):");
         lblStart.setMinWidth(180);
-        startTimeField = new TextField("2025-05-20 09:48");
+        startTimeField = new TextField("2025-06-03 09:20");
         startTimeField.setPrefWidth(150);
+
+        Label lblCardio = new Label("有氧時間 (分鐘):");
+        TextField cardioTimeField = new TextField();
+        cardioTimeField.setPromptText("請輸入有氧分鐘數");
+        cardioTimeField.setPrefWidth(60);
 
         Label lblEnd = new Label("結束時間 (YYYY-MM-DD HH:MM):");
         lblEnd.setMinWidth(180);
         endTimeField = new TextField("2025-05-20 10:48");
         endTimeField.setPrefWidth(150);
 
+
         topPane.getChildren().addAll(
                 lblBody, bodyPartComboBox,
                 lblStart, startTimeField,
-                lblEnd,   endTimeField
+                lblCardio, cardioTimeField
+//                lblEnd,   endTimeField
         );
         mainPane.getChildren().add(topPane);
 
@@ -165,6 +186,33 @@ public class FitnessTrackerApp extends Application {
         removeExerciseButton.getStyleClass().add("secondary-button");
         removeExerciseButton.setPrefWidth(140);
         removeExerciseButton.setOnAction(e -> removeSelectedExercise());
+
+        restTimerButton = new Button("開始休息");
+        restTimerButton.getStyleClass().add("primary-button");
+        restTimerButton.setPrefWidth(140);
+        restTimerLabel = new Label("休息時間: 00:00");
+
+        restTimerButton.setOnAction(e -> {
+            if (!stopwatchRunning) {
+                elapsedSeconds = 0;
+                if (stopwatch == null) {
+                    stopwatch = new Timeline(new KeyFrame(Duration.seconds(1), evt -> {
+                        elapsedSeconds++;
+                        int min = elapsedSeconds / 60, sec = elapsedSeconds % 60;
+                        restTimerLabel.setText(String.format("休息時間: %02d:%02d", min, sec));
+                    }));
+                    stopwatch.setCycleCount(Timeline.INDEFINITE);
+                }
+                restTimerLabel.setText("休息時間: 00:00");
+                stopwatch.play();
+                restTimerButton.setText("結束休息");
+                stopwatchRunning = true;
+            } else {
+                if (stopwatch != null) stopwatch.stop();
+                restTimerButton.setText("開始休息");
+                stopwatchRunning = false;
+            }
+        });
 
         buttonPane.getChildren().addAll(addExerciseButton, removeExerciseButton);
         centerPane.getChildren().add(buttonPane);
@@ -239,7 +287,7 @@ public class FitnessTrackerApp extends Application {
             }
         });
 
-        bottomPane.getChildren().addAll(recordSessionButton, callWindowButton);
+        bottomPane.getChildren().addAll(recordSessionButton, callWindowButton, restTimerButton, restTimerLabel);
         mainPane.getChildren().add(bottomPane);
 
         HBox themeTogglePane = new HBox();
@@ -702,6 +750,7 @@ public class FitnessTrackerApp extends Application {
         BodyPart selectedPart = planBodyPartComboBox.getValue();
         if (selectedExercise != null && selectedDay != null && selectedPart != null) {
             weeklyPlanManager.addExerciseToPlan(selectedDay, selectedPart, selectedExercise);
+            weeklyPlanManager.savePlanToDatabase();
             updateDailyPlanView();
         }
     }
