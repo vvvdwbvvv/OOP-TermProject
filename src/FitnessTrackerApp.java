@@ -1,3 +1,7 @@
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import gpt.GptChatService;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -22,7 +26,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.io.File;
 import java.net.URL;
-
+import java.util.concurrent.CompletableFuture;
+import javafx.application.Platform;
 
 public class FitnessTrackerApp extends Application {
 
@@ -51,18 +56,34 @@ public class FitnessTrackerApp extends Application {
         Tab recordWorkoutTab = new Tab("記錄健身課程", createRecordWorkoutPane());
         Tab weeklyPlanTab = new Tab("每週計劃", createWeeklyPlanPane());
         Tab gymStatusTab = new Tab("健身房即時狀態", createGymStatusPane());
+        Tab chatTab          = new Tab("AI 聊天", createChatPane());
 
-        tabPane.getTabs().addAll(recordWorkoutTab, weeklyPlanTab, gymStatusTab);
+
+//        new TrainingReminderGUI();
+
+        recordWorkoutTab.setClosable(false);
+        weeklyPlanTab.setClosable(false);
+        gymStatusTab.setClosable(false);
+        chatTab.setClosable(false);
+
+        tabPane.getTabs().addAll(recordWorkoutTab, weeklyPlanTab, gymStatusTab, chatTab);
 
         Scene scene = new Scene(tabPane, 800, 600);
-        URL cssUrl = getClass().getResource("/ui.css");
-        System.out.println("DEBUG: cssUrl = " + cssUrl);
-        if (cssUrl != null) {
-            scene.getStylesheets().add(cssUrl.toExternalForm());
-            System.out.println("成功載入 ui.css");
-        } else {
-            System.err.println("Warning: 找不到 /ui.css，請確認放在 src/resources 之下且 Gradle 已經處理過");
+        URL lightCssUrl = getClass().getResource("/ui.css");
+        if (lightCssUrl == null) {
+            throw new IllegalStateException("無法找到 /ui.css，請確認已把 ui.css 放在 src/main/resources/");
         }
+        String lightCss = lightCssUrl.toExternalForm();
+        scene.getStylesheets().add(lightCss);
+        System.out.println("成功載入 ui.css → " + lightCss);
+
+        // 暗黑模式样式
+        URL darkCssUrl = getClass().getResource("/dark.css");
+        if (darkCssUrl == null) {
+            throw new IllegalStateException("無法找到 /dark.css，請確認已把 dark.css 放在 src/main/resources/");
+        }
+        String darkCss = darkCssUrl.toExternalForm();
+        System.out.println("成功載入 dark.css → " + darkCss);
 
         primaryStage.setTitle("健身追蹤器");
         primaryStage.setScene(scene);
@@ -166,6 +187,8 @@ public class FitnessTrackerApp extends Application {
         selectedPane.getChildren().addAll(lblSel, selectedExercisesList);
         centerPane.getChildren().add(selectedPane);
 
+        VBox.setVgrow(centerPane, Priority.ALWAYS);
+
         mainPane.getChildren().add(centerPane);
 
         // ===== Bottom 區：組數／次數／重量／按鈕 =====
@@ -219,6 +242,50 @@ public class FitnessTrackerApp extends Application {
         bottomPane.getChildren().addAll(recordSessionButton, callWindowButton);
         mainPane.getChildren().add(bottomPane);
 
+        HBox themeTogglePane = new HBox();
+        themeTogglePane.setAlignment(Pos.CENTER_RIGHT);
+        themeTogglePane.setPadding(new Insets(10, 0, 0, 0)); // 顶部留一些空隙
+        themeTogglePane.setPrefHeight(40);
+
+        ToggleButton darkModeToggle = new ToggleButton("暗黑模式");
+        darkModeToggle.setFocusTraversable(false);
+        darkModeToggle.setPrefWidth(100);
+        // 在初始时，如果您想 Tab 打开时默认为浅色，可以先不设置样式
+        // darkModeToggle.getStyleClass().add("secondary-button"); // 如需要自定义按钮样式可加
+
+        themeTogglePane.getChildren().add(darkModeToggle);
+        mainPane.getChildren().add(themeTogglePane);
+        VBox.setVgrow(themeTogglePane, Priority.NEVER);
+
+        // ──────────────────────────────────────────────────────────────────────
+
+        // ─── 五、在这里为 darkModeToggle 绑定 CSS 切换逻辑 ─────────────────────────
+        //    注意：此处假设 start(...) 中已经加载了 lightCss 和 darkCss
+        //    你只需把这两行字符串改成你自己的路径变量：
+        String lightCss = getClass().getResource("/ui.css").toExternalForm();
+        String darkCss  = getClass().getResource("/dark.css").toExternalForm();
+
+        darkModeToggle.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            Scene scene = mainPane.getScene(); // 拿到当前 Scene
+            if (scene == null) return;
+
+            if (isNowSelected) {
+                // 切到暗黑
+                scene.getStylesheets().remove(lightCss);
+                if (!scene.getStylesheets().contains(darkCss)) {
+                    scene.getStylesheets().add(darkCss);
+                }
+                darkModeToggle.setText("淺色模式");
+            } else {
+                // 切回明亮
+                scene.getStylesheets().remove(darkCss);
+                if (!scene.getStylesheets().contains(lightCss)) {
+                    scene.getStylesheets().add(lightCss);
+                }
+                darkModeToggle.setText("暗黑模式");
+            }
+        });
+
         updateAvailableExercises();
         return mainPane;
     }
@@ -233,7 +300,7 @@ public class FitnessTrackerApp extends Application {
 
         // 1.1. 上方標題
         Label title = new Label("每週訓練計劃");
-        title.getStyleClass().add("title");  // 這裡的 .title 是在 ui.css 裡定義的粗體深色
+        title.getStyleClass().add("status-title");
         mainContainer.getChildren().add(title);
 
         // 1.2. 「選擇星期」區塊 （可考慮也套 sub-card，但這裡直接放在 card 裡）
@@ -243,7 +310,7 @@ public class FitnessTrackerApp extends Application {
 
         Label lblDay = new Label("選擇星期：");
         lblDay.setMinWidth(80);
-        lblDay.setStyle("-fx-font-size: 14; -fx-text-fill: #1F2937; -fx-font-family: \"Microsoft JhengHei\";");
+        lblDay.getStyleClass().add("status-text");
 
         dayOfWeekComboBox = new ComboBox<>();
         dayOfWeekComboBox.getItems().addAll(DayOfWeek.values());
@@ -266,7 +333,7 @@ public class FitnessTrackerApp extends Application {
 
         // 左側標題
         Label lblAdd = new Label("添加運動到計劃：");
-        lblAdd.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #0F172A; -fx-font-family: \"Microsoft JhengHei\";");
+        lblAdd.getStyleClass().add("status-title");
         lblAdd.setMinHeight(25);
 
         // 選身體部位 ComboBox
@@ -300,7 +367,7 @@ public class FitnessTrackerApp extends Application {
 
         // 右側標題
         Label lblTodayPlan = new Label("當日計劃：");
-        lblTodayPlan.setStyle("-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #0F172A; -fx-font-family: \"Microsoft JhengHei\";");
+        lblTodayPlan.getStyleClass().add("status-title");
         lblTodayPlan.setMinHeight(25);
 
         // 當日計劃列表
@@ -353,7 +420,7 @@ public class FitnessTrackerApp extends Application {
 
         // 一.1 卡片標題
         Label statusTitle = new Label("健身房即時狀態");
-        statusTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0F172A;");
+        statusTitle.getStyleClass().add("status-title");
         statusCard.getChildren().add(statusTitle);
 
         // 一.2 HBox: 目前人數 / 燈號 / 建議 / （Spacer）/ 刷新按鈕
@@ -361,12 +428,12 @@ public class FitnessTrackerApp extends Application {
         statusPane.setAlignment(Pos.CENTER_LEFT);
 
         Text occupancyText = new Text("目前人數: -- / --");
-        occupancyText.setStyle("-fx-font-size: 14px; -fx-fill: #1F2937;");
+        occupancyText.getStyleClass().add("status-text");
 
         Circle lightIndicator = new Circle(8, Color.GRAY);
 
         Text suggestionText = new Text("建議: --");
-        suggestionText.setStyle("-fx-font-size: 14px; -fx-fill: #475569;");
+        suggestionText.getStyleClass().add("status-text");
 
         Region spacer1 = new Region();
         HBox.setHgrow(spacer1, Priority.ALWAYS);
@@ -388,37 +455,33 @@ public class FitnessTrackerApp extends Application {
         // ──────────────────────────────────────────────────────────────────────
 
         // ─── 二、圖表子卡片 (Chart Sub-Card) ─────────────────────────────────
-        VBox chartCard = new VBox();
+        VBox chartCard = new VBox(10);
         chartCard.setPadding(new Insets(15));
         chartCard.getStyleClass().add("sub-card");
         chartCard.setFillWidth(true);
-        chartCard.setSpacing(10);
 
-        // 二.1 卡片標題
+        VBox.setVgrow(chartCard, Priority.ALWAYS);
+
         Label chartTitle = new Label("健身教室進場人數分佈圖");
-        chartTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0F172A;");
         chartCard.getChildren().add(chartTitle);
 
-        // 二.2 圖表區域：使用 Pane 取代 StackPane，不會跟子節點互相改變尺寸
+        // 這裡把容器預設高度改小一些（例如 200 或 250），避免圖片撐得過高
         Pane imageContainer = new Pane();
-        imageContainer.setMinHeight(300);
-        // imageContainer.setPrefHeight(300); // 可以設定預設高度
-        VBox.setVgrow(imageContainer, Priority.ALWAYS); // 讓它可以撐開剩下空間，如果視窗拉高就伸長
+        imageContainer.setMinHeight(0);
+        imageContainer.setPrefHeight(200);            // ← 這裡設定「預設顯示高度」
+        VBox.setVgrow(imageContainer, Priority.ALWAYS);
 
-        // 讀取本地圖片 (或是改用 resources 裡的 getResource)
+        // 讀取本地圖片
         ImageView gymDiagram = new ImageView(
                 new Image(new File("src/images/gym_diagram.png").toURI().toString())
         );
         gymDiagram.setPreserveRatio(true);
         gymDiagram.setSmooth(true);
 
-        // 只綁定寬度 (扣掉左右各 0px)：因為卡片本身已經有 padding，這裡直接根据 imageContainer 的寬度來算
         gymDiagram.fitWidthProperty().bind(imageContainer.widthProperty());
+        gymDiagram.fitHeightProperty().bind(imageContainer.heightProperty());
 
-        // 不要綁定 fitHeight，讓 preserveRatio 幫忙算
-        // gymDiagram.fitHeightProperty().bind(imageContainer.heightProperty()); // ✕ 這行要刪掉
-
-        // 把 ImageView 放到 imageContainer 裡
+        // 把 ImageView 放到 imageContainer 裡；同一張卡片內的 padding 可以靠 chartCard 設定
         imageContainer.getChildren().add(gymDiagram);
 
         chartCard.getChildren().add(imageContainer);
@@ -432,14 +495,14 @@ public class FitnessTrackerApp extends Application {
         memberCard.setFillWidth(true);
 
         Label memberTitle = new Label("會員查詢");
-        memberTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0F172A;");
+        memberTitle.getStyleClass().add("status-title");
         memberCard.getChildren().add(memberTitle);
 
         HBox memberPane = new HBox(12);
         memberPane.setAlignment(Pos.CENTER_LEFT);
 
         Label lblId = new Label("會員ID：");
-        lblId.setStyle("-fx-font-size: 14px; -fx-text-fill: #1F2937;");
+        lblId.getStyleClass().add("status-text");
         lblId.setMinWidth(60);
 
         TextField idField = new TextField();
@@ -462,7 +525,7 @@ public class FitnessTrackerApp extends Application {
         HBox.setHgrow(spacer2, Priority.ALWAYS);
 
         Label expiryLabel = new Label("剩餘時效：--");
-        expiryLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #475569;");
+        expiryLabel.getStyleClass().add("status-text");
 
         memberPane.getChildren().addAll(lblId, idField, checkMembershipButton, spacer2, expiryLabel);
         memberCard.getChildren().add(memberPane);
@@ -483,6 +546,88 @@ public class FitnessTrackerApp extends Application {
 
         return outerCard;
     }
+
+    /**
+     * 建立一個簡單的多輪對話 Panel，並為各節點加上 styleClass。
+     */
+    private BorderPane createChatPane() {
+        // 最外層用 card 外觀
+        BorderPane root = new BorderPane();
+        root.getStyleClass().addAll("card", "chat-root");
+        root.setPadding(new Insets(15));
+
+        // ─── 1. 聊天顯示區 (中央)：用 TextArea，並加上自訂的 styleClass
+        TextArea chatDisplay = new TextArea();
+        chatDisplay.getStyleClass().addAll("chat-display", "text-area-base");
+        chatDisplay.setEditable(false);
+        chatDisplay.setWrapText(true);
+        chatDisplay.setPromptText("對話內容會顯示在這裡……");
+        // 也可以把字型大小放到 CSS 裡，這裡先加個預設的 inline style
+        chatDisplay.getStyleClass().add("chat-display");
+        chatDisplay.setEditable(false);
+        chatDisplay.setWrapText(true);
+        VBox.setVgrow(chatDisplay, Priority.ALWAYS);
+        root.setCenter(chatDisplay);
+
+        // ─── 2. 輸入區 (下方)：HBox + 自訂 styleClass
+        HBox inputArea = new HBox(8);
+        inputArea.getStyleClass().add("chat-input-area");
+        inputArea.setPadding(new Insets(10, 0, 0, 0));
+        inputArea.setAlignment(Pos.CENTER_LEFT);
+
+        TextField userInputField = new TextField();
+        userInputField.getStyleClass().add("chat-input-field");
+        userInputField.setPromptText("請輸入要問 AI 的問題…");
+        HBox.setHgrow(userInputField, Priority.ALWAYS);
+
+        Button sendButton = new Button("送出");
+        sendButton.getStyleClass().addAll("primary-button", "chat-send-button");
+        sendButton.setDisable(false);
+
+        inputArea.getChildren().addAll(userInputField, sendButton);
+        root.setBottom(inputArea);
+
+        // ─── 3. 取得 GptChatService
+        String apiKey = System.getenv("OPENAI_API_KEY");
+        if (apiKey == null || apiKey.isBlank()) {
+            chatDisplay.appendText("[錯誤] 未設定 OPENAI_API_KEY\n");
+        }
+        GptChatService chatService = GptChatService.getInstance(apiKey, "你必須回答有關健身的問題，針對用戶提供任何有關健身與營養的問題給予幫助，如果是無關的問題請回答我不知道");
+
+        // ─── 4. 「送出」按鈕事件
+        sendButton.setOnAction(e -> {
+            String question = userInputField.getText().trim();
+            if (question.isEmpty()) {
+                return;
+            }
+            sendButton.setDisable(true);
+            userInputField.setDisable(true);
+
+            chatDisplay.appendText("[User] " + question + "\n");
+            userInputField.clear();
+
+            CompletableFuture.supplyAsync(() -> {
+                try {
+                    return chatService.ask(question);
+                } catch (Exception ex) {
+                    return "[Error] 呼叫 GptChatService 發生例外: " + ex.getMessage();
+                }
+            }).whenComplete((reply, ex2) -> {
+                Platform.runLater(() -> {
+                    chatDisplay.appendText("[Assistant] " + reply + "\n\n");
+                    sendButton.setDisable(false);
+                    userInputField.setDisable(false);
+                    userInputField.requestFocus();
+                });
+            });
+        });
+
+        userInputField.setOnAction(e -> sendButton.fire());
+
+        return root;
+    }
+
+
 
     private void showAlert(AlertType type, String title, String message) {
         System.out.println("Showing alert: " + message);
@@ -587,48 +732,56 @@ public class FitnessTrackerApp extends Application {
      * @param suggestionText  用來顯示建議文字的 Text 節點
      */
     private void updateOccupancy(Text occupancyText, Circle lightIndicator, Text suggestionText) {
-        // 1. 準備 SQL 查詢：取最新一筆「current_people」與「total_people」
         String sql = "SELECT current_people, total_people FROM real_time_status ORDER BY time DESC LIMIT 1";
 
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
+            // 先把所有「顏色相關的 class」先拿掉
+            lightIndicator.getStyleClass().removeAll("status-red", "status-orange", "status-green", "status-gray");
+            suggestionText.getStyleClass().removeAll("status-red", "status-orange", "status-green", "status-gray");
+
             if (rs.next()) {
                 int current = rs.getInt("current_people");
                 int total   = rs.getInt("total_people");
 
-                // 2. 更新上方顯示文字
                 occupancyText.setText("目前人數: " + current + " / " + total);
 
-                // 3. 計算比例，並根據比例選擇顏色與建議文字
                 double ratio = (total > 0) ? (double) current / total : 0.0;
 
                 if (ratio > 0.8) {
-                    // 超過八成 → 紅燈，提醒「請避開高峰」
-                    lightIndicator.setFill(Color.RED);
+                    // 加紅燈 class
+                    lightIndicator.getStyleClass().add("status-red");
                     suggestionText.setText("建議: 請避開高峰");
+                    suggestionText.getStyleClass().add("status-red");
+
                 } else if (ratio > 0.5) {
-                    // 超過五成 → 橙燈，提醒「適中，可斟酌」
-                    lightIndicator.setFill(Color.ORANGE);
+                    // 加橙燈 class
+                    lightIndicator.getStyleClass().add("status-orange");
                     suggestionText.setText("建議: 適中，可斟酌");
+                    suggestionText.getStyleClass().add("status-orange");
+
                 } else {
-                    // 低於五成 → 綠燈，提醒「舒適，適合前往」
-                    lightIndicator.setFill(Color.GREEN);
+                    // 加綠燈 class
+                    lightIndicator.getStyleClass().add("status-green");
                     suggestionText.setText("建議: 舒適，適合前往");
+                    suggestionText.getStyleClass().add("status-green");
                 }
+
             } else {
-                // 如果結果集為空，可視為尚未有任何資料
+                // 沒資料
                 occupancyText.setText("目前人數: -- / --");
-                lightIndicator.setFill(Color.GRAY);
+                lightIndicator.getStyleClass().add("status-gray");
                 suggestionText.setText("建議: --");
+                suggestionText.getStyleClass().add("status-gray");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            // 若發生例外，就跳警告對話框
             showAlert(AlertType.ERROR, "錯誤", "更新健身房佔用率時發生錯誤:\n" + e.getMessage());
         }
     }
+
 
 
     public static void main(String[] args) {

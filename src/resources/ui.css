@@ -68,3 +68,147 @@
 .label:hover {
     -fx-opacity: 0.9;
 }
+
+.status-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;     /* 濃黑／深灰，淺色模式下顯眼 */
+    -fx-font-family: "Microsoft JhengHei";
+}
+
+/* 卡片裡的次要文字（目前人數、建議、會員ID、剩餘時效） */
+.status-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1F2937;     /* 深灰文字，淺底上可讀性高 */
+    -fx-font-family: "Microsoft JhengHei";
+}
+
+/* 3. 紅 / 橙 / 綠 / 灰 燈號對應 */
+.status-red {
+    -fx-fill: #DC2626;   /* 紅色 (Tailwind: red-600) */
+}
+.status-orange {
+    -fx-fill: #EA580C;   /* 橙色 (Tailwind: orange-600) */
+}
+.status-green {
+    -fx-fill: #059669;   /* 綠色 (Tailwind: emerald-600) */
+}
+.status-gray {
+    -fx-fill: #6B7280;   /* 灰色 (Tailwind: gray-500) */
+}
+
+/* 4. Circle 也能套用相同的背景顏色 */
+.status-red:filled {
+    -fx-fill: #DC2626;
+}
+.status-orange:filled {
+    -fx-fill: #EA580C;
+}
+.status-green:filled {
+    -fx-fill: #059669;
+}
+.status-gray:filled {
+    -fx-fill: #6B7280;
+}
+
+.chat-root {
+    /* 繼承 .card 的白底、圓角與陰影 */
+    /* 額外加點背景色與邊框距離 */
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 4);
+    -fx-padding: 15px;
+    -fx-spacing: 10px;
+}
+
+/* 聊天顯示區 TextArea */
+.chat-display {
+    /* 淡灰底、細圓角 */
+    -fx-background-color: #F3F4F6;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #D1D5DB;
+    -fx-border-width: 1px;
+    /* 文字顏色與字型 */
+    -fx-text-fill: #1F2937;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 13px;
+    /* 內邊距讓文字不貼邊 */
+    -fx-padding: 8px;
+}
+
+/* Chat 輸入區 HBox */
+.chat-input-area {
+    -fx-spacing: 8px;
+    -fx-padding: 10px 0 0 0;
+    -fx-alignment: center-left;
+}
+
+/* 輸入框 TextField */
+.chat-input-area .text-field {
+    /* 淺底、細圓角 */
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: #D1D5DB;
+    -fx-border-width: 1px;
+    /* 內部文字 */
+    -fx-text-fill: #1F2937;
+    -fx-font-family: "Microsoft JhengHei";
+    -fx-font-size: 13px;
+    /* 內邊距 */
+    -fx-padding: 4px 8px 4px 8px;
+}
+
+/* 送出按鈕 */
+.chat-input-area .button {
+    /* 繼承 .primary-button 的綠底白字樣式 */
+    -fx-background-color: #059669;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 13px;
+    -fx-font-family: "Microsoft JhengHei";
+    -fx-background-radius: 4px;
+    -fx-border-radius:     4px;
+    -fx-padding: 0 12px;
+}
+.chat-input-area .button:hover {
+    -fx-background-color: #047857;
+}
+
+/* ─── 提示文字顏色（PromptText） ─────────────────────────────────────────── */s
+.chat-display .text {
+    -fx-prompt-text-fill: #9CA3AF; /* 淺灰提示 */
+}
+.chat-input-area .text-field .text {
+    -fx-prompt-text-fill: #9CA3AF;
+}
+
+/* ─── 捲動條樣式（視需要可再細調） ──────────────────────────────────────── */
+.chat-display .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+.chat-display .scroll-pane .scroll-bar:horizontal .thumb,
+.chat-display .scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #CBD5E1;   /* 淺灰滑塊 */
+    -fx-background-radius: 4px;
+}
+.chat-display .scroll-pane .scroll-bar:horizontal .track,
+.chat-display .scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: #E5E7EB;   /* 更淺灰軌道 */
+    -fx-background-radius: 4px;
+}
+
+/* ─── 捲動時陰影效果（可選） ──────────────────────────────────────────── */
+.chat-display .scroll-pane:focused .viewport {
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.04), 4, 0, 0, 2);
+}
+
+/* ─── 專用文字格式：User/Assistant 標籤 ───────────────────────────────── */
+.chat-display .user-label {
+    -fx-fill: #065F46;   /* 深綠色 */
+    -fx-font-weight: bold;
+}
+.chat-display .assistant-label {
+    -fx-fill: #1F2937;   /* 深灰色 */
+    -fx-font-weight: bold;
+}

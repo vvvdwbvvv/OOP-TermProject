@@ -54,7 +54,7 @@ public class WorkoutData {
 
             // 注意這裡只從 workout_sessions 撈資料，muscle group 直接來自 body_parts_trained 欄位
             String query =  """
-                    SELECT start_time, end_time, body_parts_trained
+                    SELECT start_time, end_time, body_parts_trained, cardio_time
                     FROM workout_sessions
                     ORDER BY start_time DESC
                     LIMIT 50

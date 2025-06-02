@@ -1,0 +1,452 @@
+/* =============================================================================
+   dark.css
+   說明：
+   - 背景改成接近純黑 (#121212) 的深色系
+   - 卡片、次級卡片顏色也改深一點、搭配淺灰邊框與陰影
+   - 文字、按鈕、輸入框、下拉選單等元件都調整成淺色文字＋深色背景
+   - 修正按鈕的按下/懸停/禁用狀態，確保可讀性
+   - 針對 ListView、TextField、ComboBox、Button 都做了細節樣式
+   ===========================================================================*/
+
+/* ── 全域背景 & 根節點 ───────────────────────────────────────────────────── */
+.root {
+    -fx-background-color: #121212;    /* 接近純黑 */
+    -fx-text-fill: #E0E0E0;           /* 全域文字採淺灰 */
+}
+
+/* ── 卡片 (.card) 與 次級卡片 (.sub-card) ───────────────────────────────── */
+.card {
+    -fx-background-color: #1E1E1E;                                        /* 深色卡片背景 */
+    -fx-background-radius: 8px;                                            /* 圓角 */
+    -fx-border-radius: 8px;                                                /* 邊框圓角要一致 */
+    -fx-border-color: #2C2C2C;                                             /* 偏深灰邊框，避免純黑太突兀 */
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.5), 10, 0, 0, 4);     /* 深色陰影 */
+    -fx-padding: 15px;                                                     /* 內邊距，讓內容不會太貼邊 */
+}
+
+.sub-card {
+    -fx-background-color: #181818;                                        /* 次級卡片再深一點 */
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #2C2C2C;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.4), 6, 0, 0, 3);       /* 較輕微的陰影 */
+    -fx-padding: 12px;
+}
+
+/* ===========================================================================
+   【 卡片裡的主要標題文字 】
+   =========================================================================== */
+.status-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFFFFF;      /* 純白，深色底上可讀性高 */
+    -fx-font-family: "Microsoft JhengHei";
+}
+
+/* ===========================================================================
+   【 卡片裡的次要文字（目前人數、建議、會員ID、剩餘時效） 】
+   =========================================================================== */
+.status-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #D1D5DB;        /* 淺灰 (#D1D5DB)，深色底上也足夠對比 */
+    -fx-font-family: "Microsoft JhengHei";
+}
+
+
+/* ── 文字、標籤、提示字 (Label, Text) ──────────────────────────────────── */
+.label, .text {
+    -fx-text-fill: #E0E0E0;      /* 亮灰白文字 */
+    -fx-font-family: "Microsoft JhengHei", "Arial", sans-serif;
+}
+
+/* 標題文字可再加粗 */
+.header-label {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+}
+
+/* ── Button ──────────────────────────────────────────────────────────────── */
+/* 主操作按鈕（.primary-button）：要在深底上顯眼 */
+.primary-button {
+    -fx-background-color: #0F9D58;    /* Google 綠或可依喜好更改 */
+    -fx-text-fill: #FFFFFF;           /* 白字 */
+    -fx-font-size: 13px;
+    -fx-font-family: "Microsoft JhengHei", sans-serif;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-padding: 6px 15px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.3), 4, 0, 0, 2);
+}
+.primary-button:hover {
+    -fx-background-color: #0BB14D;    /* 懸停時稍微變亮 */
+}
+.primary-button:pressed {
+    -fx-background-color: #0A8C45;    /* 按下時再暗一點 */
+}
+.primary-button:disabled {
+    -fx-background-color: #3A3A3A;    /* 禁用時深灰背景 */
+    -fx-text-fill: #808080;           /* 深灰文字 */
+    -fx-cursor: default;
+}
+
+/* 次要按鈕（.secondary-button）：講求不那麼強烈，卻要能點擊 */
+.secondary-button {
+    -fx-background-color: #2C2C2C;    /* 暗灰底 */
+    -fx-text-fill: #E0E0E0;           /* 亮灰字 */
+    -fx-font-size: 13px;
+    -fx-font-family: "Microsoft JhengHei", sans-serif;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: #3A3A3A;
+    -fx-border-width: 1px;
+    -fx-padding: 6px 15px;
+    -fx-cursor: hand;
+}
+.secondary-button:hover {
+    -fx-background-color: #363636;    /* 懸停時略亮 */
+}
+.secondary-button:pressed {
+    -fx-background-color: #2A2A2A;    /* 按下時再暗 */
+}
+.secondary-button:disabled {
+    -fx-background-color: #1F1F1F;    /* 禁用時更深灰 */
+    -fx-text-fill: #666666;
+    -fx-cursor: default;
+}
+
+/* 切換深／淺模式按鈕 (ToggleButton) */
+.toggle-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E0E0E0;
+    -fx-border-color: #E0E0E0;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-font-family: "Microsoft JhengHei", sans-serif;
+    -fx-padding: 4px 10px;
+}
+.toggle-button:hover {
+    -fx-background-color: rgba(224,224,224,0.1);
+}
+.toggle-button:selected {
+    -fx-background-color: #0F9D58;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: transparent;
+}
+
+/* ── TextField / PasswordField / TextArea ────────────────────────────────── */
+/* TextField 包含：日期時間、會員ID input 等 */
+.text-field, .text-area, .password-field {
+    -fx-background-color: #1E1E1E;    /* 深灰背景 */
+    -fx-text-fill: #E0E0E0;           /* 淺灰文字 */
+    -fx-prompt-text-fill: #808080;    /* placeholder 淺灰 */
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: #3A3A3A;
+    -fx-border-width: 1px;
+    -fx-padding: 4px 8px;
+}
+.text-field:focused, .text-area:focused, .password-field:focused {
+    -fx-border-color: #0F9D58;        /* 聚焦時綠色邊框 */
+}
+
+/* ── ComboBox ───────────────────────────────────────────────────────────── */
+/* 下拉選單（ComboBox）及其內部 ListCell */
+.combo-box {
+    -fx-background-color: #1E1E1E;
+    -fx-text-fill: #E0E0E0;
+    -fx-border-color: #3A3A3A;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+.combo-box .list-cell {
+    -fx-text-fill: #E0E0E0;
+    -fx-background-color: transparent;
+}
+.combo-box:hover {
+    -fx-border-color: #0F9D58;        /* 懸停時綠邊示意可點擊 */
+}
+.combo-box:focused {
+    -fx-border-color: #0F9D58;        /* 聚焦時綠邊 */
+}
+
+/* 下拉展開後的下拉清單 */
+.combo-box-popup .list-view {
+    -fx-background-color: #252525;
+}
+.combo-box-popup .list-cell:filled:selected,
+.combo-box-popup .list-cell:filled:selected:hover {
+    -fx-background-color: #0F9D58;    /* 下拉選中項綠底 */
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ── ListView (.list-view-small) ───────────────────────────────────────── */
+.list-view-small {
+    -fx-background-color: #1E1E1E;     /* 深灰背景 */
+    -fx-control-inner-background: #1E1E1E;
+    -fx-border-color: #3A3A3A;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+.list-view-small .list-cell {
+    -fx-text-fill: #E0E0E0;            /* 亮灰文字 */
+    -fx-padding: 4px 8px;
+}
+.list-view-small .list-cell:filled:selected,
+.list-view-small .list-cell:filled:selected:hover {
+    -fx-background-color: #0F9D58;     /* 被選中項綠底 */
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ── TitledPane / TabPane 樣式 ────────────────────────────────────────── */
+.titled-pane > .title {
+    -fx-font-size: 14px;
+    -fx-font-family: "Microsoft JhengHei", sans-serif;
+    -fx-text-fill: #E0E0E0;
+}
+.tab-pane .tab-header-background {
+    -fx-background-color: #1E1E1E;
+}
+.tab-pane .tab {
+    -fx-background-color: transparent;
+}
+.tab-pane .tab:selected {
+    -fx-background-color: #252525;
+}
+.tab-pane .tab-label {
+    -fx-text-fill: #E0E0E0;
+}
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ── ScrollBar 樣式優化 (視需要可自行增刪) ───────────────────────────── */
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 0 2 0 0;
+}
+.scroll-bar .track {
+    -fx-background-color: #1E1E1E;
+    -fx-background-insets: 0;
+    -fx-border-color: #2C2C2C;
+    -fx-border-width: 1;
+    -fx-padding: 0;
+}
+.scroll-bar .thumb {
+    -fx-background-color: #3A3A3A;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4px;
+}
+.scroll-bar .thumb:hover {
+    -fx-background-color: #4E4E4E;
+}
+
+/* ── Divider (例如 SplitPane) ──────────────────────────────────────────── */
+.split-pane .split-pane-divider {
+    -fx-background-color: #2C2C2C;    /* 深灰分隔線 */
+    -fx-padding: 0;
+}
+
+/* ── Tooltip ───────────────────────────────────────────────────────────── */
+.tooltip {
+    -fx-background-color: rgba(50, 50, 50, 0.9);
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 8px;
+    -fx-background-radius: 4px;
+}
+
+/* ── ProgressIndicator / ProgressBar ──────────────────────────────────── */
+.progress-bar, .progress-indicator {
+    -fx-accent: #0F9D58;     /* 綠色進度條 */
+}
+
+
+.status-text {
+    -fx-font-size: 14px;
+    -fx-font-weight: normal;
+    -fx-font-family: "Microsoft JhengHei";
+
+    /*↓ Text 用 ↓*/
+    -fx-fill:       #D1D5DB;   /* 淺灰 (Tailwind gray-300) */
+    /*↓ Label 用 ↓*/
+    -fx-text-fill:  #D1D5DB;
+}
+
+/* 3. 紅 / 橙 / 綠 / 灰 燈號（深底下也要改成淺一點的版本） */
+.status-red {
+    -fx-fill: #FCA5A5;   /* 淺紅 (Tailwind: red-300) */
+}
+.status-orange {
+    -fx-fill: #FED7AA;   /* 淺橙 (Tailwind: orange-300) */
+}
+.status-green {
+    -fx-fill: #6EE7B7;   /* 淺綠 (Tailwind: emerald-300) */
+}
+.status-gray {
+    -fx-fill: #9CA3AF;   /* 亮灰 (Tailwind: gray-400) */
+}
+
+/* 同理，Circle 也用一樣的定義 */
+.status-red:filled {
+    -fx-fill: #FCA5A5;
+}
+.status-orange:filled {
+    -fx-fill: #FED7AA;
+}
+.status-green:filled {
+    -fx-fill: #6EE7B7;
+}
+.status-gray:filled {
+    -fx-fill: #9CA3AF;
+}
+
+
+/* =============================================================================
+   Chat Pane (AI 聊天) 專用深色樣式
+   這裡假設 .chat-root、.chat-display、.chat-input-area
+   在 ui.css 裡已有對應 class，暗黑模式下只需要 override 或補上深色風格
+   ===========================================================================*/
+
+/* ░░░ 聊天面板最外層容器 ░░░ */
+.chat-root {
+    -fx-background-color: #1E1E1E;         /* 深灰背景 */
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: #2C2C2C;             /* 比卡片更深的邊框 */
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.6), 10, 0, 0, 4);
+    -fx-padding: 15px;
+}
+
+/* ░░░ 聊天顯示區 TextArea ░░░ */
+.chat-display {
+    -fx-background-color: #2A2A2A;         /* 更深一點的灰色底 */
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: #3A3A3A;             /* 深灰邊框 */
+    -fx-border-width: 1px;
+    -fx-text-fill: #E0E0E0;                /* 亮灰文字 */
+    -fx-prompt-text-fill: #808080;         /* 提示文字更淡灰 */
+    -fx-font-family: "Consolas";
+    -fx-font-size: 13px;
+    -fx-padding: 8px;
+}
+
+/* 捲動條 (ScrollBar) 在 TextArea 裡也要套深色 */
+.chat-display .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+.chat-display .scroll-pane .scroll-bar:vertical .track,
+.chat-display .scroll-pane .scroll-bar:horizontal .track {
+    -fx-background-color: #2A2A2A;
+}
+.chat-display .scroll-pane .scroll-bar:vertical .thumb,
+.chat-display .scroll-pane .scroll-bar:horizontal .thumb {
+    -fx-background-color: #3A3A3A;
+    -fx-background-radius: 4px;
+}
+.chat-display .scroll-pane .scroll-bar:vertical .thumb:hover,
+.chat-display .scroll-pane .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #4E4E4E;
+}
+
+/* ░░░ 輸入區 HBox ░░░ */
+.chat-input-area {
+    -fx-spacing: 8px;
+    -fx-padding: 10px 0 0 0;
+    -fx-alignment: center-left;
+}
+
+/* ░░░ 輸入框 TextField ░░░ */
+.chat-input-area .text-field {
+    -fx-background-color: #1E1E1E;         /* 深底 */
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-color: #3A3A3A;             /* 深灰邊框 */
+    -fx-border-width: 1px;
+    -fx-text-fill: #E0E0E0;                /* 淺灰文字 */
+    -fx-prompt-text-fill: #808080;         /* 深底上的 placeholder */
+    -fx-font-family: "Microsoft JhengHei";
+    -fx-font-size: 13px;
+    -fx-padding: 4px 8px;
+}
+.chat-input-area .text-field:focused {
+    -fx-border-color: #0F9D58;             /* 聚焦時綠邊框 */
+}
+
+/* ░░░ 送出按鈕 Button ░░░ */
+.chat-input-area .button {
+    -fx-background-color: #0F9D58;         /* 綠色主按 */
+    -fx-text-fill: #FFFFFF;                /* 純白字 */
+    -fx-font-size: 13px;
+    -fx-font-family: "Microsoft JhengHei";
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-padding: 6px 15px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.3), 4, 0, 0, 2);
+}
+.chat-input-area .button:hover {
+    -fx-background-color: #0BB14D;         /* 懸停時 */
+}
+.chat-input-area .button:pressed {
+    -fx-background-color: #0A8C45;         /* 按下時 */
+}
+.chat-input-area .button:disabled {
+    -fx-background-color: #3A3A3A;         /* 禁用時深灰 */
+    -fx-text-fill: #666666;                /* 深灰文字 */
+    -fx-cursor: default;
+}
+
+/* ----------------------------------------------------------------------------
+   針對 TextArea(chat-display) 的「內部繪製背景」做覆寫
+   ---------------------------------------------------------------------------- */
+.chat-display {
+    /* 已有的深灰底 */
+    -fx-background-color: #2A2A2A;
+
+    /* 這行很重要：把控制區域（文字輸入區）底色改掉 */
+    -fx-control-inner-background: #2A2A2A;
+
+    /* 如果有邊框，也可保留，或自行微調 */
+    -fx-border-color: #3A3A3A;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+
+    -fx-text-fill: #E0E0E0;         /* 文字顏色 */
+    -fx-prompt-text-fill: #808080;  /* placeholder 顏色 */
+    -fx-font-family: "Consolas";
+    -fx-font-size: 13px;
+    -fx-padding: 8px;
+}
+
+/* 如果你之前有針對 .chat-display .scroll-pane 做過風格，也可保留，
+   但務必確保 -fx-control-inner-background 是同樣顏色。 */
+.chat-display .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+.chat-display .scroll-pane .scroll-bar:vertical .track,
+.chat-display .scroll-pane .scroll-bar:horizontal .track {
+    -fx-background-color: #2A2A2A;
+}
+.chat-display .scroll-pane .scroll-bar:vertical .thumb,
+.chat-display .scroll-pane .scroll-bar:horizontal .thumb {
+    -fx-background-color: #3A3A3A;
+    -fx-background-radius: 4px;
+}
+.chat-display .scroll-pane .scroll-bar:vertical .thumb:hover,
+.chat-display .scroll-pane .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #4E4E4E;
+}
+s
+
