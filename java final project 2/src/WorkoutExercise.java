@@ -18,6 +18,21 @@ public class WorkoutExercise {
         this.restPeriodsInSeconds = new ArrayList<>();
     }
 
+    // ADDED CONSTRUCTOR
+    public WorkoutExercise(Exercise exercise, int sets, int reps, double weight) {
+        this.restPeriodsInSeconds = new ArrayList<>(); // Initialize rest periods
+        this.exercise = exercise;
+        if (exercise != null) {
+            this.exerciseId = exercise.getId();
+        }
+        this.sets = sets;
+        this.reps = reps;
+        this.weight = weight;
+        // Note: 'id' and 'workoutSessionId' are not set here.
+        // They are typically set when the WorkoutExercise is saved to the database
+        // or associated with a WorkoutSession object that has an ID.
+    }
+
     public WorkoutExercise(int workoutSessionId, int exerciseId, int sets, int reps, double weight) {
         this.workoutSessionId = workoutSessionId;
         this.exerciseId = exerciseId;
