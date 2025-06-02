@@ -1,0 +1,70 @@
+/* ui.css */
+
+/* 全域背景（留給 Scene）——若頁面要白底，可移除或改顏色 */
+.root {
+    -fx-background-color: #F8FAFC;
+}
+
+/* card：白底 + 大陰影 + 圓角 */
+.card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 4);
+    -fx-padding: 15px; /* 給外層一點內邊距 */
+}
+
+/* sub-card：白底 + 淡陰影 + 圓角 */
+.sub-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.04), 6, 0, 0, 2);
+    -fx-padding: 12px;
+}
+
+/* primary-button：綠底 + 白字 + 圓角 */
+.primary-button {
+    -fx-background-color: #059669;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 13px;
+    -fx-font-family: "Microsoft JhengHei";
+    -fx-background-radius: 4px;
+    -fx-border-radius:     4px;
+    -fx-padding: 0 12px 0 12px;
+}
+.primary-button:hover {
+    -fx-background-color: #047857;
+}
+
+/* secondary-button：灰底 + 深字 + 圓角 */
+.secondary-button {
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #1F2937;
+    -fx-font-size: 13px;
+    -fx-font-family: "Microsoft JhengHei";
+    -fx-background-radius: 4px;
+    -fx-border-radius:     4px;
+    -fx-padding: 0 10px 0 10px;
+}
+.secondary-button:hover {
+    -fx-background-color: #CBD5E1;
+}
+
+/* ─── 標題字：粗體、深色 ───────────────────────────────────────── */
+.card .label.title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+    -fx-font-family: "Microsoft JhengHei";
+}
+
+/* ─── 一般文字 ──────────────────────────────────────────────────── */
+.card .text, .card .label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1F2937;
+    -fx-font-family: "Microsoft JhengHei";
+}
+
+/* ─── 滑鼠懸停效果（針對 Label） ───────────────────────────────── */
+.label:hover {
+    -fx-opacity: 0.9;
+}

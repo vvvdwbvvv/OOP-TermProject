@@ -6,30 +6,48 @@ plugins {
 group = 'com.jgym'
 version = '1.0.0'
 
+// 指定要執行的主類別。如果 FitnessTrackerApp.java 沒有 package，就直接寫類名；
+// 如果放在 package com.jgym，就要寫 'com.jgym.FitnessTrackerApp'。
+application {
+    mainClass = 'FitnessTrackerApp'
+
+    // 在 run 時自動帶上 JavaFX 的 module-path 與模組名稱
+    applicationDefaultJvmArgs = [
+            '--module-path', 'lib/javafx-sdk-21.0.7/lib',
+            '--add-modules', 'javafx.controls,javafx.fxml'
+    ]
+}
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    // Local JavaFX SDK
-    implementation fileTree(dir: 'lib/javafx-sdk-21.0.7/lib', include: ['javafx.*.jar'])
-    // Local MySQL driver
+    // 把 lib/javafx-sdk-21.0.7/lib 底下所有 JAR 都加進來
+    implementation fileTree(dir: 'lib/javafx-sdk-21.0.7/lib', include: ['*.jar'])
+
+    // MySQL 驅動
     implementation files('lib/mysql-connector-j-9.2.0.jar')
 }
 
-application {
-    mainClass = 'FitnessTrackerApp'
-    // Pass JavaFX module path to JVM
-    applicationDefaultJvmArgs = [
-        '--module-path', 'lib/javafx-sdk-21.0.7/lib',
-        '--add-modules', 'javafx.controls,javafx.fxml'
-    ]
+java {
+    // 將編譯等級調為 Java 21
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+
+    // 若要使用 Gradle Toolchain 保證用本機 JDK 21 進行編譯，也可以這樣寫：
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 sourceSets {
     main {
         java {
             srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src/resources']
         }
     }
 }
