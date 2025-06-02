@@ -70,6 +70,7 @@ public class FitnessTrackerApp { // Renamed from main to FitnessTrackerApp
 
         frame.add(tabbedPane);
         frame.setVisible(true);
+        new TrainingReminderGUI();
     }
 
     private JPanel createRecordWorkoutPanel() {
