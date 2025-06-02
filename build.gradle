@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.jgym'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Local JavaFX SDK
+    implementation fileTree(dir: 'lib/javafx-sdk-21.0.7/lib', include: ['javafx.*.jar'])
+    // Local MySQL driver
+    implementation files('lib/mysql-connector-j-9.2.0.jar')
+}
+
+application {
+    mainClass = 'FitnessTrackerApp'
+    // Pass JavaFX module path to JVM
+    applicationDefaultJvmArgs = [
+        '--module-path', 'lib/javafx-sdk-21.0.7/lib',
+        '--add-modules', 'javafx.controls,javafx.fxml'
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
