@@ -92,6 +92,16 @@ public class ExerciseData {
     }
 
     /**
+     * 獲取所有運動項目列表。
+     * 目前與 getAllDefaultExercises() 功能相同。
+     * 回傳的是一個列表的副本，以防止外部修改原始列表。
+     * @return 包含所有運動項目的列表 (List<Exercise>)
+     */
+    public static List<Exercise> getAllExercises() {
+        return new ArrayList<>(DEFAULT_EXERCISES); // 回傳副本
+    }
+
+    /**
      * 根據指定的身體部位獲取預設的運動項目列表。
      * @param bodyPart 要篩選的身體部位 (BodyPart)
      * @return 包含符合條件運動項目的列表 (List<Exercise>)
