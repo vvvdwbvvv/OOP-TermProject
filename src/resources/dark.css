@@ -70,13 +70,14 @@
 /* ── Button ──────────────────────────────────────────────────────────────── */
 /* 主操作按鈕（.primary-button）：要在深底上顯眼 */
 .primary-button {
-    -fx-background-color: #0F9D58;    /* Google 綠或可依喜好更改 */
+    -fx-background-color: linear-gradient(to bottom, #0F9D58, #047857);  /* Google 綠或可依喜好更改 */
     -fx-text-fill: #FFFFFF;           /* 白字 */
-    -fx-font-size: 13px;
-    -fx-font-family: "Microsoft JhengHei", sans-serif;
-    -fx-background-radius: 4px;
-    -fx-border-radius: 4px;
-    -fx-padding: 6px 15px;
+    -fx-font-size: 14px;
+    -fx-font-family: "Microsoft JhengHei UI", "Segoe UI", system-ui;
+    -fx-font-weight: 500;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 16px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.3), 4, 0, 0, 2);
 }

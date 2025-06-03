@@ -1,214 +1,301 @@
 /* ui.css */
 
-/* 全域背景（留給 Scene）——若頁面要白底，可移除或改顏色 */
-.root {
-    -fx-background-color: #F8FAFC;
+.root{
+    -fx-background-color: #FAFAFA;
+    -fx-font-smoothing-type: gray;
 }
 
-/* card：白底 + 大陰影 + 圓角 */
 .card {
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 8px;
-    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 4);
-    -fx-padding: 15px; /* 給外層一點內邊距 */
+    -fx-background-radius: 12px; /* 更大的圓角，更現代 */
+    -fx-effect: dropshadow(one-pass-box, rgba(15, 15, 15, 0.04), 16, 0, 0, 4),
+    dropshadow(one-pass-box, rgba(15, 15, 15, 0.08), 4, 0, 0, 1); /* 雙重陰影效果 */
+    -fx-padding: 24px; /* 更寬鬆的內邊距 */
+    -fx-border-color: rgba(227, 227, 227, 0.6);
+    -fx-border-width: 0.5px;
+    -fx-border-radius: 12px;
 }
 
-/* sub-card：白底 + 淡陰影 + 圓角 */
+.card:hover {
+    -fx-effect: dropshadow(one-pass-box, rgba(15, 15, 15, 0.06), 20, 0, 0, 6),
+    dropshadow(one-pass-box, rgba(15, 15, 15, 0.12), 6, 0, 0, 2);
+    -fx-cursor: hand;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   次要卡片 - 更輕量的設計
+   ═══════════════════════════════════════════════════════════════════ */
 .sub-card {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 6px;
-    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.04), 6, 0, 0, 2);
-    -fx-padding: 12px;
-}
-
-/* primary-button：綠底 + 白字 + 圓角 */
-.primary-button {
-    -fx-background-color: #059669;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 13px;
-    -fx-font-family: "Microsoft JhengHei";
-    -fx-background-radius: 4px;
-    -fx-border-radius:     4px;
-    -fx-padding: 0 12px 0 12px;
-}
-.primary-button:hover {
-    -fx-background-color: #047857;
-}
-
-/* secondary-button：灰底 + 深字 + 圓角 */
-.secondary-button {
-    -fx-background-color: #E2E8F0;
-    -fx-text-fill: #1F2937;
-    -fx-font-size: 13px;
-    -fx-font-family: "Microsoft JhengHei";
-    -fx-background-radius: 4px;
-    -fx-border-radius:     4px;
-    -fx-padding: 0 10px 0 10px;
-}
-.secondary-button:hover {
-    -fx-background-color: #CBD5E1;
-}
-
-/* ─── 標題字：粗體、深色 ───────────────────────────────────────── */
-.card .label.title {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #0F172A;
-    -fx-font-family: "Microsoft JhengHei";
-}
-
-/* ─── 一般文字 ──────────────────────────────────────────────────── */
-.card .text, .card .label {
-    -fx-font-size: 14px;
-    -fx-text-fill: #1F2937;
-    -fx-font-family: "Microsoft JhengHei";
-}
-
-/* ─── 滑鼠懸停效果（針對 Label） ───────────────────────────────── */
-.label:hover {
-    -fx-opacity: 0.9;
-}
-
-.status-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #0F172A;     /* 濃黑／深灰，淺色模式下顯眼 */
-    -fx-font-family: "Microsoft JhengHei";
-}
-
-/* 卡片裡的次要文字（目前人數、建議、會員ID、剩餘時效） */
-.status-text {
-    -fx-font-size: 14px;
-    -fx-text-fill: #1F2937;     /* 深灰文字，淺底上可讀性高 */
-    -fx-font-family: "Microsoft JhengHei";
-}
-
-/* 3. 紅 / 橙 / 綠 / 灰 燈號對應 */
-.status-red {
-    -fx-fill: #DC2626;   /* 紅色 (Tailwind: red-600) */
-}
-.status-orange {
-    -fx-fill: #EA580C;   /* 橙色 (Tailwind: orange-600) */
-}
-.status-green {
-    -fx-fill: #059669;   /* 綠色 (Tailwind: emerald-600) */
-}
-.status-gray {
-    -fx-fill: #6B7280;   /* 灰色 (Tailwind: gray-500) */
-}
-
-/* 4. Circle 也能套用相同的背景顏色 */
-.status-red:filled {
-    -fx-fill: #DC2626;
-}
-.status-orange:filled {
-    -fx-fill: #EA580C;
-}
-.status-green:filled {
-    -fx-fill: #059669;
-}
-.status-gray:filled {
-    -fx-fill: #6B7280;
-}
-
-.chat-root {
-    /* 繼承 .card 的白底、圓角與陰影 */
-    /* 額外加點背景色與邊框距離 */
-    -fx-background-color: #FFFFFF;
+    -fx-background-color: #FBFBFB; /* 極淺的灰底 */
     -fx-background-radius: 8px;
-    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 4);
-    -fx-padding: 15px;
-    -fx-spacing: 10px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.02), 8, 0, 0, 2);
+    -fx-padding: 16px;
+    -fx-border-color: rgba(230, 230, 230, 0.8);
+    -fx-border-width: 0.5px;
+    -fx-border-radius: 8px;
 }
 
-/* 聊天顯示區 TextArea */
-.chat-display {
-    /* 淡灰底、細圓角 */
-    -fx-background-color: #F3F4F6;
+.sub-card:hover {
+    -fx-background-color: #F8F8F8;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.04), 12, 0, 0, 3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   按鈕設計 - Notion 風格的現代按鈕
+   ═══════════════════════════════════════════════════════════════════ */
+.primary-button {
+    -fx-background-color: linear-gradient(to bottom, #0F9D58, #047857);
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-font-family: "Microsoft JhengHei UI", "Segoe UI", system-ui;
+    -fx-font-weight: 500;
     -fx-background-radius: 6px;
     -fx-border-radius: 6px;
-    -fx-border-color: #D1D5DB;
-    -fx-border-width: 1px;
-    /* 文字顏色與字型 */
-    -fx-text-fill: #1F2937;
-    -fx-font-family: "Consolas";
-    -fx-font-size: 13px;
-    /* 內邊距讓文字不貼邊 */
-    -fx-padding: 8px;
+    -fx-padding: 8px 16px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.3), 4, 0, 0, 2);    -fx-cursor: hand;
 }
 
-/* Chat 輸入區 HBox */
+.primary-button:hover {
+    -fx-background-color: #0BB14D;    /* 懸停時稍微變亮 */
+}
+.primary-button:pressed {
+    -fx-background-color: #0A8C45;    /* 按下時再暗一點 */
+}
+
+.secondary-button {
+    -fx-background-color: #F3F4F6;
+    -fx-text-fill: #374151;
+    -fx-font-size: 14px;
+    -fx-font-family: "Microsoft JhengHei UI", "Segoe UI", system-ui;
+    -fx-font-weight: 500;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: rgba(209, 213, 219, 0.8);
+    -fx-border-width: 1px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #E5E7EB;
+    -fx-border-color: rgba(156, 163, 175, 0.9);
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.08), 6, 0, 0, 2);
+}
+
+.secondary-button:pressed {
+    -fx-background-color: #D1D5DB;
+    -fx-scale-y: 0.98;
+    -fx-scale-x: 0.98;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   文字樣式 - Notion 的層次化字體系統
+   ═══════════════════════════════════════════════════════════════════ */
+.card .label.title, .status-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #111827; /* 更深的黑色 */
+    -fx-font-family: "Microsoft JhengHei UI", "Segoe UI", system-ui;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.02), 1, 0, 0, 1);
+}
+
+.card .text, .card .label, .status-text {
+    -fx-font-size: 15px;
+    -fx-text-fill: #4B5563; /* 中等灰色，更有層次 */
+    -fx-font-family: "Microsoft JhengHei UI", "Segoe UI", system-ui;
+    -fx-font-weight: 400;
+    -fx-line-spacing: 1.4;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   狀態指示器 - 更現代的色彩系統
+   ═══════════════════════════════════════════════════════════════════ */
+.status-red {
+    -fx-fill: linear-gradient(to bottom, #EF4444, #DC2626); /* 漸層紅 */
+}
+
+.status-orange {
+    -fx-fill: linear-gradient(to bottom, #F59E0B, #D97706); /* 漸層橙 */
+}
+
+.status-green {
+    -fx-fill: linear-gradient(to bottom, #10B981, #059669); /* 漸層綠 */
+}
+
+.status-gray {
+    -fx-fill: linear-gradient(to bottom, #9CA3AF, #6B7280); /* 漸層灰 */
+}
+
+/* 圓形狀態指示器增強效果 */
+.status-red:filled, .status-orange:filled,
+.status-green:filled, .status-gray:filled {
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.15), 4, 0, 0, 2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   聊天介面 - Notion 風格的對話框
+   ═══════════════════════════════════════════════════════════════════ */
+.chat-root {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.06), 20, 0, 0, 6),
+    dropshadow(one-pass-box, rgba(0, 0, 0, 0.1), 6, 0, 0, 2);
+    -fx-padding: 24px;
+    -fx-spacing: 16px;
+    -fx-border-color: rgba(229, 231, 235, 0.6);
+    -fx-border-width: 0.5px;
+    -fx-border-radius: 12px;
+}
+
+.chat-display {
+    -fx-background-color: #F9FAFB; /* Notion 的代碼背景色 */
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(229, 231, 235, 0.8);
+    -fx-border-width: 1px;
+    -fx-text-fill: #1F2937;
+    -fx-font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+    -fx-font-size: 14px;
+    -fx-padding: 16px;
+    -fx-line-spacing: 1.5;
+}
+
+.chat-display:focused {
+    -fx-border-color: rgba(59, 130, 246, 0.6);
+    -fx-effect: dropshadow(one-pass-box, rgba(59, 130, 246, 0.2), 8, 0, 0, 0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   輸入區域 - 現代化的輸入體驗
+   ═══════════════════════════════════════════════════════════════════ */
 .chat-input-area {
-    -fx-spacing: 8px;
-    -fx-padding: 10px 0 0 0;
+    -fx-spacing: 12px;
+    -fx-padding: 16px 0 0 0;
     -fx-alignment: center-left;
 }
 
-/* 輸入框 TextField */
 .chat-input-area .text-field {
-    /* 淺底、細圓角 */
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 4px;
-    -fx-border-radius: 4px;
-    -fx-border-color: #D1D5DB;
-    -fx-border-width: 1px;
-    /* 內部文字 */
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(209, 213, 219, 0.8);
+    -fx-border-width: 1.5px;
     -fx-text-fill: #1F2937;
-    -fx-font-family: "Microsoft JhengHei";
-    -fx-font-size: 13px;
-    /* 內邊距 */
-    -fx-padding: 4px 8px 4px 8px;
-}
-
-/* 送出按鈕 */
-.chat-input-area .button {
-    /* 繼承 .primary-button 的綠底白字樣式 */
-    -fx-background-color: #059669;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 13px;
-    -fx-font-family: "Microsoft JhengHei";
-    -fx-background-radius: 4px;
-    -fx-border-radius:     4px;
-    -fx-padding: 0 12px;
-}
-.chat-input-area .button:hover {
-    -fx-background-color: #047857;
-}
-
-/* ─── 提示文字顏色（PromptText） ─────────────────────────────────────────── */s
-.chat-display .text {
-    -fx-prompt-text-fill: #9CA3AF; /* 淺灰提示 */
-}
-.chat-input-area .text-field .text {
+    -fx-font-family: "Microsoft JhengHei UI", "Segoe UI", system-ui;
+    -fx-font-size: 14px;
+    -fx-padding: 12px 16px;
     -fx-prompt-text-fill: #9CA3AF;
 }
+.chat-input-area .text-field:focused {
+    -fx-border-color: #0F9D58;             /* 聚焦時綠邊框 */
+}
 
-/* ─── 捲動條樣式（視需要可再細調） ──────────────────────────────────────── */
+/* ░░░ 送出按鈕 Button ░░░ */
+.chat-input-area .button {
+    -fx-background-color: #0F9D58;         /* 綠色主按 */
+    -fx-text-fill: #FFFFFF;                /* 純白字 */
+    -fx-font-size: 13px;
+    -fx-font-family: "Microsoft JhengHei";
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-padding: 6px 15px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.3), 4, 0, 0, 2);
+}
+.chat-input-area .button:hover {
+    -fx-background-color: #0BB14D;         /* 懸停時 */
+}
+.chat-input-area .button:pressed {
+    -fx-background-color: #0A8C45;         /* 按下時 */
+}
+
+.chat-input-area .button:hover {
+    fx-background-color: linear-gradient(to bottom, #0F9D58, #047857);
+    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.3), 4, 0, 0, 2);
+    -fx-scale-y: 1.02;
+    -fx-scale-x: 1.02;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   捲動條 - 極簡的 Notion 風格
+   ═══════════════════════════════════════════════════════════════════ */
 .chat-display .scroll-pane .viewport {
     -fx-background-color: transparent;
 }
+
 .chat-display .scroll-pane .scroll-bar:horizontal .thumb,
 .chat-display .scroll-pane .scroll-bar:vertical .thumb {
-    -fx-background-color: #CBD5E1;   /* 淺灰滑塊 */
-    -fx-background-radius: 4px;
+    -fx-background-color: rgba(156, 163, 175, 0.6);
+    -fx-background-radius: 6px;
 }
+
+.chat-display .scroll-pane .scroll-bar:horizontal .thumb:hover,
+.chat-display .scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(107, 114, 128, 0.8);
+}
+
 .chat-display .scroll-pane .scroll-bar:horizontal .track,
 .chat-display .scroll-pane .scroll-bar:vertical .track {
-    -fx-background-color: #E5E7EB;   /* 更淺灰軌道 */
-    -fx-background-radius: 4px;
+    -fx-background-color: rgba(243, 244, 246, 0.8);
+    -fx-background-radius: 6px;
 }
 
-/* ─── 捲動時陰影效果（可選） ──────────────────────────────────────────── */
-.chat-display .scroll-pane:focused .viewport {
-    -fx-effect: dropshadow(one-pass-box, rgba(0,0,0,0.04), 4, 0, 0, 2);
-}
-
-/* ─── 專用文字格式：User/Assistant 標籤 ───────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════
+   聊天標籤 - 區分用戶和助手的現代設計
+   ═══════════════════════════════════════════════════════════════════ */
 .chat-display .user-label {
-    -fx-fill: #065F46;   /* 深綠色 */
-    -fx-font-weight: bold;
+    -fx-fill: linear-gradient(to bottom, #059669, #047857); /* 綠色漸層 */
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-effect: dropshadow(one-pass-box, rgba(5, 150, 105, 0.3), 2, 0, 0, 1);
 }
+
 .chat-display .assistant-label {
-    -fx-fill: #1F2937;   /* 深灰色 */
-    -fx-font-weight: bold;
+    -fx-fill: linear-gradient(to bottom, #4F46E5, #4338CA); /* 藍紫色漸層 */
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-effect: dropshadow(one-pass-box, rgba(79, 70, 229, 0.3), 2, 0, 0, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   互動效果 - 微妙的動畫和回饋
+   ═══════════════════════════════════════════════════════════════════ */
+.label:hover {
+    -fx-opacity: 0.85;
+    -fx-scale-y: 1.01;
+    -fx-scale-x: 1.01;
+}
+
+/* 增加一些過渡效果的基礎 */
+.card, .sub-card, .primary-button, .secondary-button {
+    -fx-cursor: hand;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   新增：頁面載入動畫效果的基礎樣式
+   ═══════════════════════════════════════════════════════════════════ */
+.fade-in {
+    -fx-opacity: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   新增：Notion 風格的分隔線
+   ═══════════════════════════════════════════════════════════════════ */
+.divider {
+    -fx-background-color: rgba(229, 231, 235, 0.8);
+    -fx-pref-height: 1px;
+    -fx-max-height: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   新增：提示和工具提示樣式
+   ═══════════════════════════════════════════════════════════════════ */
+.tooltip {
+    -fx-background-color: rgba(17, 24, 39, 0.95);
+    -fx-text-fill: #F9FAFB;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 12px;
+    -fx-font-family: "Microsoft JhengHei UI", system-ui;
+    -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.2), 8, 0, 0, 4);
 }
