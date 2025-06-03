@@ -16,17 +16,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+
+import java.sql.*;
 import java.time.DayOfWeek;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import java.util.List;
 import java.util.Map;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.io.File;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
@@ -55,6 +52,11 @@ public class FitnessTrackerApp extends Application {
     private Timeline stopwatch;
     private boolean stopwatchRunning = false;
     private int elapsedSeconds = 0;
+    private TextField userIdField;
+    private TextField idField;
+    private Label expiryLabel;
+    private TextField registrationTimeField;
+    private TextField durationField;
 
     @Override
     public void start(Stage primaryStage) {
@@ -66,7 +68,7 @@ public class FitnessTrackerApp extends Application {
         Tab recordWorkoutTab = new Tab("記錄健身課程", createRecordWorkoutPane());
         Tab weeklyPlanTab = new Tab("每週計劃", createWeeklyPlanPane());
         Tab gymStatusTab = new Tab("健身房即時狀態", createGymStatusPane());
-        Tab chatTab          = new Tab("AI 聊天", createChatPane());
+        Tab chatTab          = new Tab("TrainGPT", createChatPane());
 
 
 //        new TrainingReminderGUI();
@@ -75,6 +77,7 @@ public class FitnessTrackerApp extends Application {
         weeklyPlanTab.setClosable(false);
         gymStatusTab.setClosable(false);
         chatTab.setClosable(false);
+
 
         tabPane.getTabs().addAll(recordWorkoutTab, weeklyPlanTab, gymStatusTab, chatTab);
 
@@ -85,24 +88,23 @@ public class FitnessTrackerApp extends Application {
         }
         String lightCss = lightCssUrl.toExternalForm();
         scene.getStylesheets().add(lightCss);
-        System.out.println("成功載入 ui.css → " + lightCss);
+        System.out.println("成功載入 ui → " + lightCss);
 
         // 暗黑模式样式
         URL darkCssUrl = getClass().getResource("/dark.css");
         if (darkCssUrl == null) {
-            throw new IllegalStateException("無法找到 /dark.css，請確認已把 dark.css 放在 src/main/resources/");
+            throw new IllegalStateException("無法找到 /dark，請確認已把 darks 放在 src/main/resources/");
         }
         String darkCss = darkCssUrl.toExternalForm();
-        System.out.println("成功載入 dark.css → " + darkCss);
-
+        System.out.println("成功載入 dark → " + darkCss);
         primaryStage.setTitle("健身追蹤器");
         primaryStage.setScene(scene);
         primaryStage.show();
         System.out.println("FitnessTrackerApp started successfully.");
+        Platform.runLater(() -> javax.swing.SwingUtilities.invokeLater(TrainingReminderGUI::new));
     }
 
     private VBox createRecordWorkoutPane() {
-        // 主容器 - 外圍加大一點 padding，並設定背景
         VBox mainPane = new VBox(15);
         mainPane.setPadding(new Insets(15));
         mainPane.getStyleClass().add("root");
@@ -136,7 +138,7 @@ public class FitnessTrackerApp extends Application {
 
         Label lblEnd = new Label("結束時間 (YYYY-MM-DD HH:MM):");
         lblEnd.setMinWidth(180);
-        endTimeField = new TextField("2025-05-20 10:48");
+        endTimeField = new TextField("2025-07-20 10:48");
         endTimeField.setPrefWidth(150);
 
 
@@ -454,24 +456,21 @@ public class FitnessTrackerApp extends Application {
 
     private Pane createGymStatusPane() {
         // ─── 最外層：大卡片 (Card) ─────────────────────────────────────────
-        // 這裡用 VBox 收三個子卡片：StatusCard、ChartCard、MemberCard
         VBox outerCard = new VBox(20);
         outerCard.setPadding(new Insets(20));
-        outerCard.getStyleClass().add("card");  // .card: 白底、圓角、陰影
+        outerCard.getStyleClass().add("card");
         outerCard.setFillWidth(true);
 
         // ─── 一、即時狀態子卡片 (Sub-Card) ────────────────────────────────────
         VBox statusCard = new VBox(10);
         statusCard.setPadding(new Insets(15));
-        statusCard.getStyleClass().add("sub-card");  // 比 .card 稍微輕一點的陰影
+        statusCard.getStyleClass().add("sub-card");
         statusCard.setFillWidth(true);
 
-        // 一.1 卡片標題
         Label statusTitle = new Label("健身房即時狀態");
         statusTitle.getStyleClass().add("status-title");
         statusCard.getChildren().add(statusTitle);
 
-        // 一.2 HBox: 目前人數 / 燈號 / 建議 / （Spacer）/ 刷新按鈕
         HBox statusPane = new HBox(15);
         statusPane.setAlignment(Pos.CENTER_LEFT);
 
@@ -500,8 +499,6 @@ public class FitnessTrackerApp extends Application {
         );
         statusCard.getChildren().add(statusPane);
 
-        // ──────────────────────────────────────────────────────────────────────
-
         // ─── 二、圖表子卡片 (Chart Sub-Card) ─────────────────────────────────
         VBox chartCard = new VBox(10);
         chartCard.setPadding(new Insets(15));
@@ -513,13 +510,11 @@ public class FitnessTrackerApp extends Application {
         Label chartTitle = new Label("健身教室進場人數分佈圖");
         chartCard.getChildren().add(chartTitle);
 
-        // 這裡把容器預設高度改小一些（例如 200 或 250），避免圖片撐得過高
         Pane imageContainer = new Pane();
         imageContainer.setMinHeight(0);
-        imageContainer.setPrefHeight(200);            // ← 這裡設定「預設顯示高度」
+        imageContainer.setPrefHeight(200);
         VBox.setVgrow(imageContainer, Priority.ALWAYS);
 
-        // 讀取本地圖片
         ImageView gymDiagram = new ImageView(
                 new Image(new File("src/images/gym_diagram.png").toURI().toString())
         );
@@ -529,12 +524,8 @@ public class FitnessTrackerApp extends Application {
         gymDiagram.fitWidthProperty().bind(imageContainer.widthProperty());
         gymDiagram.fitHeightProperty().bind(imageContainer.heightProperty());
 
-        // 把 ImageView 放到 imageContainer 裡；同一張卡片內的 padding 可以靠 chartCard 設定
         imageContainer.getChildren().add(gymDiagram);
-
         chartCard.getChildren().add(imageContainer);
-
-        // ──────────────────────────────────────────────────────────────────────
 
         // ─── 三、會員查詢子卡片 (Member Sub-Card) ─────────────────────────────
         VBox memberCard = new VBox(8);
@@ -542,48 +533,62 @@ public class FitnessTrackerApp extends Application {
         memberCard.getStyleClass().add("sub-card");
         memberCard.setFillWidth(true);
 
-        Label memberTitle = new Label("會員查詢");
-        memberTitle.getStyleClass().add("status-title");
-        memberCard.getChildren().add(memberTitle);
+        HBox registerPane = new HBox(12);
+        registerPane.setAlignment(Pos.CENTER_LEFT);
 
-        HBox memberPane = new HBox(12);
-        memberPane.setAlignment(Pos.CENTER_LEFT);
+        Label lblUserId = new Label("註冊ID：");
+        lblUserId.getStyleClass().add("status-text");
+        userIdField = new TextField();
+        userIdField.setPrefWidth(140);
+        userIdField.setPrefHeight(26);
+
+        Label lblDuration = new Label("購買時長:");
+        lblDuration.getStyleClass().add("status-text");
+        durationField = new TextField();
+        durationField.setPrefWidth(140);
+        durationField.setPrefHeight(26);
+
+        registrationTimeField = new TextField(java.time.LocalDateTime.now().toString());
+
+        Button registerButton = new Button("註冊用戶");
+        registerButton.getStyleClass().add("primary-button");
+        registerButton.setOnAction(e -> recordMemberSession());
+
+        registerPane.getChildren().addAll(lblUserId, userIdField, lblDuration, durationField, registerButton);
+
+        HBox queryPane = new HBox(12);
+        queryPane.setAlignment(Pos.CENTER_LEFT);
 
         Label lblId = new Label("會員ID：");
         lblId.getStyleClass().add("status-text");
         lblId.setMinWidth(60);
 
-        TextField idField = new TextField();
+        idField = new TextField();
         idField.setPrefWidth(140);
         idField.setPrefHeight(26);
 
         Button checkMembershipButton = new Button("查詢會員");
         checkMembershipButton.getStyleClass().add("secondary-button");
         checkMembershipButton.setPrefHeight(26);
-        checkMembershipButton.setOnAction(e -> {
-            // 這裡執行查詢資料庫取得剩餘天數，然後把結果顯示在下面的 expiryLabel
-            // 目前先示範一個假的 Alert
-            Alert alert = new Alert(AlertType.INFORMATION, "此功能尚未實作");
-            alert.setTitle("會員查詢");
-            alert.setHeaderText(null);
-            alert.showAndWait();
-        });
+        checkMembershipButton.setOnAction(e -> checkMembership());
 
         Region spacer2 = new Region();
         HBox.setHgrow(spacer2, Priority.ALWAYS);
 
-        Label expiryLabel = new Label("剩餘時效：--");
+        expiryLabel = new Label("剩餘時效：--");
         expiryLabel.getStyleClass().add("status-text");
 
-        memberPane.getChildren().addAll(lblId, idField, checkMembershipButton, spacer2, expiryLabel);
-        memberCard.getChildren().add(memberPane);
+        queryPane.getChildren().addAll(lblId, idField, checkMembershipButton, spacer2, expiryLabel);
 
-        // ──────────────────────────────────────────────────────────────────────
 
-        // 把三大區塊加回最外層
+
+        VBox.setMargin(queryPane, new Insets(12, 0, 0, 0));
+        memberCard.getChildren().addAll(registerPane, queryPane);
+
+        // Add all sub-cards to the outer card
         outerCard.getChildren().addAll(statusCard, chartCard, memberCard);
 
-        // ───【注意】如果你一開啟就想顯示最新燈號，可以在這裡先嘗試連資料庫並拿一次資料：
+        // Initialize occupancy data
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PW);
@@ -676,6 +681,31 @@ public class FitnessTrackerApp extends Application {
     }
 
 
+    private void checkMembership() {
+        if (conn == null) return;
+        String id = idField.getText().trim();
+        if (id.isEmpty()) {
+            expiryLabel.setText("請輸入ID");
+            return;
+        }
+        String sql = "SELECT register_date, duration FROM member WHERE id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    java.time.LocalDate reg = rs.getDate("register_date").toLocalDate();
+                    int dur = rs.getInt("duration");
+                    java.time.LocalDate expiry = reg.plusDays(dur);
+                    long daysLeft = java.time.temporal.ChronoUnit.DAYS.between(java.time.LocalDate.now(), expiry);
+                    expiryLabel.setText(daysLeft < 0 ? "已過期" : "剩餘: " + daysLeft + " 天");
+                } else {
+                    expiryLabel.setText("查無此會員");
+                }
+            }
+        } catch (SQLException e) {
+            expiryLabel.setText("查詢失敗");
+        }
+    }
 
     private void showAlert(AlertType type, String title, String message) {
         System.out.println("Showing alert: " + message);
@@ -830,6 +860,25 @@ public class FitnessTrackerApp extends Application {
             showAlert(AlertType.ERROR, "錯誤", "更新健身房佔用率時發生錯誤:\n" + e.getMessage());
         }
     }
+
+    private void recordMemberSession() {
+        String userId = userIdField.getText();
+        String regDate = registrationTimeField.getText(); // e.g., "2025-06-03"
+        String duration = durationField.getText();
+        String currentDate = java.time.LocalDate.now().toString(); // e.g., "2025-06-04"
+
+        String sql = "INSERT INTO member (id, register_date, duration, `current_date`) VALUES (?, ?, ?, CURRENT_DATE)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, userIdField.getText());
+            stmt.setString(2, registrationTimeField.getText());
+            stmt.setInt(3, Integer.parseInt(durationField.getText()));
+            stmt.executeUpdate();
+            showAlert(AlertType.INFORMATION, "Success", "Member session recorded!");
+        } catch (SQLException e) {
+            showAlert(AlertType.ERROR, "Database Error", e.getMessage());
+        }
+    }
+
 
 
 
